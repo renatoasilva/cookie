@@ -1,0 +1,10 @@
+/bin/
+/build/
+**/.metadata/
+.classpath
+.lock
+.log
+.markers
+**/.gradle/
+**/.settings/
+.project
