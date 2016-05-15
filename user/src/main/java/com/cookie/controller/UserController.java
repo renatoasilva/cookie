@@ -19,7 +19,7 @@ import com.cookie.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/users/v1.0")
 @Slf4j
 public class UserController {
 
