@@ -17,4 +17,4 @@ Lombok: https://projectlombok.org/
 - To setup on eclipse, dont forget to do this: http://stackoverflow.com/questions/3418865/cannot-make-project-lombok-work-on-eclipse-helios
 
 
-To run the application from the IDE (eclipse, intellij), find UserApplication.java and run as "Java Application". By default, it will run on port 8080 and will be access via: http://localhost:8080. To see if the app is running in a browser, go to http://localhost:8080/users/test
+To run the application from the IDE (eclipse, intellij), find UserApplication.java and run as "Java Application". By default, it will run on port 8080 and will be access via: http://localhost:8080. To see if the app is running in a browser, go to http://localhost:8080/users/check
