@@ -1,22 +1,25 @@
 package com.cookie.it;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static com.cookie.model.Error.ERROR_CODE;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 
 import com.cookie.Util.Util;
+import com.cookie.model.Error;
+import com.cookie.model.Error.ERROR_CODE;
 import com.cookie.model.User;
 import com.cookie.repository.UserRepository;
-import com.cookie.model.Error;
 
 public class UserControllerIT extends BaseIT {
 	private User user;
@@ -25,15 +28,14 @@ public class UserControllerIT extends BaseIT {
 
 	@Before
 	public void setup() {
-		super.setup();
+		template = restTemplate();
 		user = Util.createDefaultUser();
 	}
 
 	@Test
 	public void testFindUserByIdSuccess() throws Exception {
 		User actual = createUser(user);
-		actual = template.exchange(getURL("/" + actual.getId()), HttpMethod.GET, new HttpEntity<>(user), User.class)
-				.getBody();
+		actual = template.exchange(getURL("/" + actual.getId()), HttpMethod.GET, new HttpEntity<>(user), User.class).getBody();
 		assertNotNull(actual.getId());
 		assertNull(user.getPassword(), actual.getPassword());
 		assertEquals(user.getEmail(), actual.getEmail());
@@ -115,8 +117,7 @@ public class UserControllerIT extends BaseIT {
 		user.setFirstName("FIRST_NAME_CHANGED");
 		user.setLastName("LAST_NAME_CHANGED");
 		user.setPassword("PASSWORD_CHANGED");
-		Error error = template
-				.exchange(getURL("/" + actual.getId()), HttpMethod.PUT, new HttpEntity<>(user), Error.class).getBody();
+		Error error = template.exchange(getURL("/" + actual.getId()), HttpMethod.PUT, new HttpEntity<>(user), Error.class).getBody();
 
 		// Asserting user in mongoDB
 		assertFalse(userRepository.exists(actual.getId()));
@@ -125,9 +126,10 @@ public class UserControllerIT extends BaseIT {
 	}
 
 	private User createUser(User user) {
-		User actual = template.exchange(getURL(), HttpMethod.POST, new HttpEntity<>(user), User.class).getBody();
-		assertNotNull(actual.getId());
-		return actual;
+		Resource<User> actual = template.exchange(getURL(), HttpMethod.POST, new HttpEntity<User>(user), new ParameterizedTypeReference<Resource<User>>(){}).getBody();
+		assertNotNull(actual.getContent().getId());
+		assertTrue(actual.hasLinks());
+		return actual.getContent();
 	}
 
 	private String getURL() {

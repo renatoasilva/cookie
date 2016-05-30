@@ -57,8 +57,10 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.projectlombok:lombok:1.14.8')
+	compile("org.springframework.boot:spring-boot-starter-hateoas")
+
+	testCompile("com.jayway.jsonpath:json-path")
 	testCompile('org.springframework.boot:spring-boot-starter-test')
-	// http://mvnrepository.com/artifact/org.springframework/spring-test
 	compile('org.springframework:spring-test:4.2.6.RELEASE')
 }
 

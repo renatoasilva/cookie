@@ -5,31 +5,28 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.hateoas.Resource;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cookie.exceptions.GlobalControllerExceptionHandler;
 import com.cookie.model.User;
 import com.cookie.service.UserService;
 
-@RunWith(MockitoJUnitRunner.class)
 public class UserControllerTest {
 	private UserController underTest;
 	@Mock
 	private UserService userService;
-	@Mock
-	private User user;
 	@Spy
-	private GlobalControllerExceptionHandler defaultExceptionHandler;
+	private User user;
 	private static final String EMAIL = "e@a.com";
 	private static final String ID = "1234";
 
 	@Before
 	public void setup() {
+		MockitoAnnotations.initMocks(this);
 		underTest = new UserController();
 		ReflectionTestUtils.setField(underTest, "userService", userService);
 
@@ -37,6 +34,8 @@ public class UserControllerTest {
 		Mockito.when(userService.findUserByEmail(EMAIL)).thenReturn(user);
 		Mockito.when(userService.findUserById(ID)).thenReturn(user);
 		Mockito.when(userService.saveUser(user)).thenReturn(user);
+		Mockito.when(user.getId()).thenReturn(ID);
+		Mockito.when(user.getEmail()).thenReturn(EMAIL);
 	}
 
 	@Test
@@ -48,22 +47,22 @@ public class UserControllerTest {
 
 	@Test
 	public void testFindUserByEmailSuccess() throws Exception {
-		User actual = underTest.findUserByEmail(EMAIL);
-		assertEquals(user, actual);
+		Resource<User> actual = underTest.findUserByEmail(EMAIL);
+		assertEquals(user, actual.getContent());
 		verify(userService).findUserByEmail(EMAIL);
 	}
 
 	@Test
 	public void testSaveUserSuccess() throws Exception {
-		User actual = underTest.saveUser(user);
+		Resource<User> actual = underTest.saveUser(user);
 		assertEquals(user, actual);
 		verify(userService).saveUser(user);
 	}
 
 	@Test
 	public void testUpdateUserSuccess() throws Exception {
-		User actual = underTest.updateUser(ID, user);
-		assertEquals(user, actual);
+		Resource<User> actual = underTest.updateUser(ID, user);
+		assertEquals(user, actual.getContent());
 		verify(userService).updateUser(ID, user);
 	}
 

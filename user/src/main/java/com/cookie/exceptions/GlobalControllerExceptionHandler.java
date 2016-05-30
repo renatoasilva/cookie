@@ -19,7 +19,7 @@ import com.cookie.model.Error;
 public class GlobalControllerExceptionHandler {
 	public static final String DEFAULT_ERROR_VIEW = "error";
 
-	@ResponseStatus(HttpStatus.CONFLICT) // 409
+	@ResponseStatus(HttpStatus.CONFLICT)
 	@ExceptionHandler(CustomDataIntegrityViolationException.class)
 	@ResponseBody
 	public Error handleConflict(CustomDataIntegrityViolationException e) {

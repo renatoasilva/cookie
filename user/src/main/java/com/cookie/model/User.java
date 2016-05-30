@@ -6,17 +6,17 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import lombok.Data;
 import lombok.ToString;
 
 @Data
 @ToString(exclude = "password")
-public class User {
+public class User{
 
 	@Id
 	private String id;
-
 	@NotBlank
 	@Size(min=2)
 	private String firstName;
@@ -25,9 +25,18 @@ public class User {
 	private String lastName;
 	@NotBlank
 	@Email
+	@Indexed
 	private String email;
 	@NotBlank
 	@Size(min=6)
 	@Transient
 	private String password;
+
+	public String getUserId(){
+		return id;
+	}
+
+	public void setUserId(String userId){
+		id = userId;
+	}
 }

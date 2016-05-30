@@ -14,6 +14,7 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	private UserRepository repository;
 
+	@Override
 	public User saveUser(User user) {
 		// save a user
 		if(repository.findByEmail(user.getEmail())==null){
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
 	public User updateUser(String id, User user) {
 		User existingUser = repository.findById(id);
 		if(existingUser!=null && existingUser.getEmail().equals(user.getEmail())){
@@ -33,6 +35,7 @@ public class UserServiceImpl implements UserService {
 		}
 	}
 
+	@Override
 	public User findUserById(String id) {
 		User user = repository.findById(id);
 		if(user==null){
@@ -41,6 +44,7 @@ public class UserServiceImpl implements UserService {
 		return user;
 	}
 
+	@Override
 	public User findUserByEmail(String email) {
 		User user = repository.findByEmail(email);
 		if(user==null){
