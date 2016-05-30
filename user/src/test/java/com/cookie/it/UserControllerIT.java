@@ -5,7 +5,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.assertFalse;
+import static com.cookie.model.Error.ERROR_CODE;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import com.cookie.Util.Util;
 import com.cookie.model.User;
 import com.cookie.repository.UserRepository;
+import com.cookie.model.Error;
 
 public class UserControllerIT extends BaseIT {
 	private User user;
@@ -30,8 +32,8 @@ public class UserControllerIT extends BaseIT {
 	@Test
 	public void testFindUserByIdSuccess() throws Exception {
 		User actual = createUser(user);
-		actual = template.exchange(getBaseUrl() + "/users/v1.0/" + actual.getId(), HttpMethod.GET,
-				new HttpEntity<>(user), User.class).getBody();
+		actual = template.exchange(getURL("/" + actual.getId()), HttpMethod.GET, new HttpEntity<>(user), User.class)
+				.getBody();
 		assertNotNull(actual.getId());
 		assertNull(user.getPassword(), actual.getPassword());
 		assertEquals(user.getEmail(), actual.getEmail());
@@ -39,21 +41,27 @@ public class UserControllerIT extends BaseIT {
 
 	@Test
 	public void testFindUserByIdNotFoundFail() throws Exception {
-		Error actual = template.exchange(getBaseUrl() + "/users/v1.0/randomID", HttpMethod.GET,
-				null, Error.class).getBody();
+		Error actual = template.exchange(getURL("/randomID"), HttpMethod.GET, null, Error.class).getBody();
 		assertNotNull(actual);
-//		assertNull(, actual.getMessage());
-//		assertEquals(user.getEmail(), actual.getEmail());
+		assertEquals(ERROR_CODE.USER_NOT_FOUND, actual.getCode());
+		assertEquals("User with id=randomID does not exist.", actual.getMessage());
 	}
 
 	@Test
 	public void testFindUserByEmailSuccess() throws Exception {
 		User actual = createUser(user);
-		actual = template.exchange(getBaseUrl() + "/users/v1.0?email=" + actual.getEmail(), HttpMethod.GET,
-				null, User.class).getBody();
+		actual = template.exchange(getURL("?email=" + actual.getEmail()), HttpMethod.GET, null, User.class).getBody();
 		assertNotNull(actual.getId());
 		assertNull(user.getPassword(), actual.getPassword());
 		assertEquals(user.getEmail(), actual.getEmail());
+	}
+
+	@Test
+	public void testFindUserByEmailFail() throws Exception {
+		String invalidEmail = "e@invalidemail.com";
+		Error error = template.exchange(getURL("?email=" + invalidEmail), HttpMethod.GET, null, Error.class).getBody();
+		assertEquals(ERROR_CODE.USER_NOT_FOUND, error.getCode());
+		assertEquals("User with email=" + invalidEmail + " does not exist.", error.getMessage());
 	}
 
 	@Test
@@ -72,13 +80,24 @@ public class UserControllerIT extends BaseIT {
 	}
 
 	@Test
+	public void testSaveUserAlreadyExistsFail() throws Exception {
+		User actual = createUser(user);
+		Error error = template.exchange(getURL(), HttpMethod.POST, new HttpEntity<>(user), Error.class).getBody();
+
+		// Asserting user in mongoDB
+		assertTrue(userRepository.exists(actual.getId()));
+		assertEquals(ERROR_CODE.USER_ALREADY_EXISTS, error.getCode());
+		assertEquals(user.getEmail() + " already exists", error.getMessage());
+	}
+
+	@Test
 	public void testUpdateUserSuccess() throws Exception {
 		User actual = createUser(user);
 		user.setFirstName("FIRST_NAME_CHANGED");
 		user.setLastName("LAST_NAME_CHANGED");
 		user.setPassword("PASSWORD_CHANGED");
-		actual = template.exchange(getBaseUrl() + "/users/v1.0/" + actual.getId(), HttpMethod.PUT,
-				new HttpEntity<>(user), User.class).getBody();
+		actual = template.exchange(getURL("/" + actual.getId()), HttpMethod.PUT, new HttpEntity<>(user), User.class)
+				.getBody();
 		assertNotEquals(user, actual);
 
 		// Asserting user in mongoDB
@@ -89,9 +108,33 @@ public class UserControllerIT extends BaseIT {
 		assertEquals(user.getEmail(), dbUser.getEmail());
 	}
 
+	@Test
+	public void testUpdateUserNotFoundFail() throws Exception {
+		User actual = new User();
+		actual.setId("INVALID_ID");
+		user.setFirstName("FIRST_NAME_CHANGED");
+		user.setLastName("LAST_NAME_CHANGED");
+		user.setPassword("PASSWORD_CHANGED");
+		Error error = template
+				.exchange(getURL("/" + actual.getId()), HttpMethod.PUT, new HttpEntity<>(user), Error.class).getBody();
+
+		// Asserting user in mongoDB
+		assertFalse(userRepository.exists(actual.getId()));
+		assertEquals(ERROR_CODE.USER_NOT_FOUND, error.getCode());
+		assertEquals("User with id=INVALID_ID does not exist.", error.getMessage());
+	}
+
 	private User createUser(User user) {
-		User actual = template.exchange(getBaseUrl() + "/users/v1.0/", HttpMethod.POST, new HttpEntity<>(user), User.class).getBody();
+		User actual = template.exchange(getURL(), HttpMethod.POST, new HttpEntity<>(user), User.class).getBody();
 		assertNotNull(actual.getId());
 		return actual;
+	}
+
+	private String getURL() {
+		return getURL(null);
+	}
+
+	private String getURL(String path) {
+		return getBaseUrl() + "/v1.0/users" + (path != null ? path : "");
 	}
 }

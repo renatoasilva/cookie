@@ -30,7 +30,7 @@ public class UserServiceTest {
 
 	@Before
 	public void setup() {
-		underTest = new UserService();
+		underTest = new UserServiceImpl();
 		ReflectionTestUtils.setField(underTest, "repository", userRepository);
 
 		when(user.getEmail()).thenReturn(EMAIL);

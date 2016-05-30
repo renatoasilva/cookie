@@ -19,7 +19,7 @@ import com.cookie.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/users/v1.0")
+@RequestMapping("/v1.0/users")
 @Slf4j
 public class UserController {
 
@@ -40,7 +40,7 @@ public class UserController {
 		return userService.findUserByEmail(email);
 	}
 	
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST)
 	@Transactional
 	@ResponseBody
 	public User saveUser(@RequestBody @Valid User user){

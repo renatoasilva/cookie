@@ -12,7 +12,21 @@ public class Error {
 	private String message;
 
 	public enum ERROR_CODE {
-		USER_NOT_FOUND, INVALID_USER, INVALID_FIELD, ERROR;
+		USER_NOT_FOUND("User not found"),
+		USER_ALREADY_EXISTS("User already exists"),
+		INVALID_USER("Invalid user"),
+		INVALID_FIELD("Invalid field"),
+		ERROR("Unexpected Error");
+
+		private String description;
+
+		private ERROR_CODE(String description) {
+			this.description = description;
+		}
+
+		public String getDescription() {
+			return description;
+		}
 	}
 
 	public void addError(Error error) {

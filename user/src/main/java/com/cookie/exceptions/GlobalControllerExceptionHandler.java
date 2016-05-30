@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
@@ -21,11 +20,12 @@ public class GlobalControllerExceptionHandler {
 	public static final String DEFAULT_ERROR_VIEW = "error";
 
 	@ResponseStatus(HttpStatus.CONFLICT) // 409
-	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ExceptionHandler(CustomDataIntegrityViolationException.class)
 	@ResponseBody
-	public Error handleConflict(Exception e) {
+	public Error handleConflict(CustomDataIntegrityViolationException e) {
 		Error error = new Error();
-		error.addError(Error.ERROR_CODE.ERROR, e.getMessage());
+		error.setCode(e.getErrorCode());
+		error.setMessage(e.getMessage());
 		return error;
 	}
 
